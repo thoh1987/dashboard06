@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>통합 대시보드 - 1페이지 & 2페이지</title>
+    <title>통합 대시보드 - 1페이지 & 2페이지 완벽 반응형</title>
     <style>
         /* =========================================
            [공통 및 페이지 전환 설정]
@@ -11,27 +11,29 @@
         body {
             margin: 0;
             padding: 0;
-            overflow: hidden; /* 페이지 밖으로 나가는 스크롤 방지 */
-            background-color: #12141a; /* 기본 배경색 */
+            overflow: hidden; /* 화면 밖으로 나가는 스크롤을 완전히 차단해요! */
+            width: 100vw; /* 화면 너비를 100% 꽉 채웁니다 */
+            height: 100vh; /* 화면 높이를 100% 꽉 채웁니다 */
+            background-color: #12141a; 
         }
 
-        /* 페이지들을 숨기고, active 클래스가 붙으면 보여주기 */
+        /* 1페이지와 2페이지 모두 화면을 100% 채우는 상자로 만들어요 */
         .page-container {
             display: none;
-            width: 100vw;
-            height: 100vh;
+            width: 100%;
+            height: 100%;
+            box-sizing: border-box;
         }
         
         #page1.active {
-            display: flex; /* 1페이지는 flex로 배치됩니다 */
+            display: flex; 
         }
         
         #page2.active {
-            display: block; /* 2페이지는 내부 컨테이너가 알아서 크기를 잡습니다 */
-            overflow: auto;
+            display: flex; 
+            flex-direction: column;
         }
 
-        /* 둥둥 떠 있는 예쁜 페이지 전환 버튼 */
         .toggle-btn {
             position: fixed;
             bottom: 30px;
@@ -45,17 +47,17 @@
             font-weight: bold;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
             cursor: pointer;
-            z-index: 9999; /* 화면 제일 위에 떠 있도록 설정 */
+            z-index: 9999; 
             transition: all 0.3s ease;
         }
 
         .toggle-btn:hover {
             background-color: #39ACE5;
-            transform: scale(1.05); /* 마우스를 올리면 살짝 커집니다 */
+            transform: scale(1.05); 
         }
 
         /* =========================================
-           [1페이지 (가로 타임라인) 전용 스타일]
+           [1페이지 (가로 타임라인) 전용 반응형 스타일]
            ========================================= */
         :root {
             --bg-color: #12141a; --card-bg: #1e222d; --text-color: #ffffff;
@@ -68,7 +70,6 @@
             --b-radius-lg: 12px;  
         }
 
-        /* 🚨 애니메이션 설정 (4h > 5h > 작업중) */
         @keyframes pulse-urgent-4h {
             0% { box-shadow: 0 0 0 0px rgba(255, 153, 153, 0.4); border-color: var(--status-4h); }
             50% { box-shadow: 0 0 10px 2px rgba(255, 153, 153, 0.7); border-color: #fff; }
@@ -94,89 +95,100 @@
         }
 
         #page1 * { box-sizing: border-box; font-family: 'Segoe UI', 'Pretendard', sans-serif; letter-spacing: -0.3px; }
-        #page1 { background-color: var(--bg-color); color: var(--text-color); padding: 10px; gap: 10px; }
+        
+        /* 1페이지 전체 공간을 %와 vh(화면 비율)로 줬어요 */
+        #page1 { background-color: var(--bg-color); color: var(--text-color); padding: 1.5vh 1vw; gap: 1vw; }
 
-        /* --- 1. 좌측 패널 (고정) --- */
-        .left-panel { width: 260px; display: flex; flex-direction: column; gap: 10px; flex-shrink: 0; }
-        #page1 .card { background: var(--card-bg); border-radius: var(--b-radius-lg); border: 1px solid var(--border-color); padding: 15px; }
-        .circle-gauge { width: 150px; height: 150px; margin: 10px auto 15px; border: 12px solid #2d3446; border-top: 12px solid var(--accent-soft-blue); border-radius: 50%; display: flex; flex-direction: column; justify-content: center; align-items: center; }
-        .circle-gauge .percent { font-size: 42px; font-weight: bold; color: var(--highlight-blue); animation: glow-subtle 4s infinite ease-in-out; display: inline-block; }
-        .circle-gauge .label { font-size: 11px; opacity: 0.8; margin-top: 2px; }
-        .stat-display { background: #000; border-radius: var(--b-radius-lg); padding: 10px 15px; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; }
-        .val-done { font-size: 20px; font-weight: bold; color: var(--highlight-blue); } 
-        .stat-value-bold { font-size: 20px; font-weight: bold; color: #fff; } 
-        .std-title { color: var(--accent-red); font-size: 15px; font-weight: bold; margin-bottom: 12px; display: block; text-align: center;}
-        .std-over-item { border: 1px solid var(--accent-red); background: rgba(255, 77, 77, 0.05); padding: 8px; border-radius: 4px; margin-bottom: 6px; display: flex; justify-content: center; align-items: center; gap: 20px; font-size: 13px; animation: warning-glow 2s infinite ease-in-out; }
+        /* --- 1. 1페이지 좌측 패널 --- */
+        .left-panel { width: 15%; min-width: 200px; max-width: 260px; display: flex; flex-direction: column; gap: 1.5vh; flex-shrink: 0; }
+        #page1 .card { background: var(--card-bg); border-radius: var(--b-radius-lg); border: 1px solid var(--border-color); padding: 1.5vh 1vw; }
+        
+        /* 동그라미도 화면 비율에 맞게! */
+        .circle-gauge { width: 12vh; height: 12vh; min-width: 100px; min-height: 100px; margin: 1vh auto; border: 8px solid #2d3446; border-top: 8px solid var(--accent-soft-blue); border-radius: 50%; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        .circle-gauge .percent { font-size: 3vh; font-weight: bold; color: var(--highlight-blue); animation: glow-subtle 4s infinite ease-in-out; display: inline-block; }
+        .circle-gauge .label { font-size: 1.2vh; opacity: 0.8; margin-top: 2px; }
+        
+        .stat-display { background: #000; border-radius: var(--b-radius-lg); padding: 1vh 1vw; margin-bottom: 0.5vh; display: flex; justify-content: space-between; align-items: center; }
+        .val-done { font-size: 2vh; font-weight: bold; color: var(--highlight-blue); } 
+        .stat-value-bold { font-size: 2vh; font-weight: bold; color: #fff; } 
+        .std-title { color: var(--accent-red); font-size: 1.5vh; font-weight: bold; margin-bottom: 1vh; display: block; text-align: center;}
+        
+        /* 리스트가 넘치면 얌전하게 스크롤! */
+        .std-list { flex: 1; overflow-y: auto; max-height: 30vh; padding-right: 5px; }
+        .std-over-item { border: 1px solid var(--accent-red); background: rgba(255, 77, 77, 0.05); padding: 1vh; border-radius: 4px; margin-bottom: 6px; display: flex; justify-content: center; align-items: center; gap: 1vw; font-size: 1.3vh; animation: warning-glow 2s infinite ease-in-out; }
 
-        /* --- 2. 우측 메인 패널 (가로 타임라인) --- */
-        .right-panel { flex: 1; display: flex; flex-direction: column; gap: 10px; overflow: hidden; }
-        .main-card { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: var(--card-bg); border-radius: var(--b-radius-lg); border: 1px solid var(--border-color); padding: 10px; }
-        .main-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 1px solid #2d3446; padding-bottom: 6px; }
-        .legend { display: flex; gap: 10px; font-size: 12px; font-weight: 500; }
+        /* --- 2. 1페이지 우측 메인 패널 --- */
+        .right-panel { flex: 1; display: flex; flex-direction: column; gap: 1.5vh; overflow: hidden; min-width: 0; }
+        .main-card { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: var(--card-bg); border-radius: var(--b-radius-lg); border: 1px solid var(--border-color); padding: 1.5vh 1vw; }
+        .main-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1vh; border-bottom: 1px solid #2d3446; padding-bottom: 1vh; }
+        .legend { display: flex; gap: 1vw; font-size: 1.3vh; font-weight: 500; }
         .legend-item { display: flex; align-items: center; gap: 4px; }
         .dot { width: 8px; height: 8px; border-radius: 2px; }
 
-        /* 가로 스크롤 컨테이너 */
+        /* ★가장 중요한 마법!★ 19개의 기둥을 감싸는 상자가 가로로 스크롤되지 않게 꽉 묶었어요 */
         .timeline-container { 
             flex: 1; 
-            overflow-x: auto; 
-            overflow-y: hidden; 
+            overflow: hidden; /* 가로 스크롤을 막았어요! */
             display: flex; 
-            gap: 15px; 
-            padding-bottom: 10px;
+            gap: 0.3vw; 
+            padding-bottom: 1vh;
+            min-height: 0;
         }
 
-        /* 각 시간대별 수직 기둥 */
+        /* ★문제 해결!★ min-width 160px을 없애고 flex: 1을 주어서 TV를 19조각으로 딱 맞게 나눠요 */
         .time-column { 
-            min-width: 160px; 
+            flex: 1; /* 고무줄 마법! */
+            min-width: 0; /* 절대로 자기 크기를 고집하지 마! */
             display: flex; 
             flex-direction: column; 
-            gap: 10px; 
+            gap: 1vh; 
             border-right: 1px solid rgba(255, 255, 255, 0.05);
-            padding-right: 15px;
+            padding-right: 0.2vw;
         }
 
         .time-header-label { 
             text-align: center;
-            padding-bottom: 8px;
+            padding-bottom: 0.5vh;
             border-bottom: 2px solid #39ACE5;
-            margin-bottom: 5px;
+            margin-bottom: 0.5vh;
         }
-        .time-label-txt { font-size: 16px; font-weight: bold; color: #FFFFFF; }
+        .time-label-txt { font-size: 1.5vh; font-weight: bold; color: #FFFFFF; }
 
         .flight-list-scroll {
             flex: 1;
-            overflow-y: auto; 
+            overflow-y: auto; /* 기둥 안에서 카드가 많아지면 위아래로만 움직여요 */
             display: flex;
             flex-direction: column;
-            gap: 8px;
-            padding-right: 4px;
+            gap: 6px;
+            padding-right: 2px;
+            min-height: 0;
         }
 
-        /* 작업 칩 */
-        .flight-chip { background: #161a23; border: 1px solid #333; border-radius: 8px; padding: 6px; display: flex; align-items: center; gap: 8px; min-height: 42px; width: 100%; }
+        /* 기둥 폭이 좁아졌으니, 비행기 카드 안의 배치도 위아래로 쌓이게 바꿨어요 */
+        .flight-chip { background: #161a23; border: 1px solid #333; border-radius: 6px; padding: 4px; display: flex; flex-direction: column; align-items: center; gap: 4px; width: 100%; }
         .flight-chip.is-urgent-4h { animation: pulse-urgent-4h 1.5s infinite !important; border-width: 1.5px; border-color: var(--status-4h) !important; z-index: 10; }
         .flight-chip.is-warning-5h { animation: pulse-warning-5h 1.8s infinite; border-width: 1.5px; z-index: 9; }
         .flight-chip.is-working { animation: pulse-working 2s infinite; border-color: #81C784; }
 
-        .flt-no { font-size: 12px; font-weight: bold; color: #eee; width: 42px; text-align: center; }
-        .status-stack { display: flex; flex-direction: column; gap: 2px; flex: 1; }
-        .status-row { display: flex; align-items: center; gap: 4px; justify-content: space-between; }
-        .step-label { font-size: 8px; color: #999; font-weight: bold; min-width: 20px; line-height: 1; } 
+        .flt-no { font-size: 1.4vh; font-weight: bold; color: #eee; width: 100%; text-align: center; }
+        .status-stack { display: flex; flex-direction: column; gap: 2px; width: 100%; }
+        .status-row { display: flex; align-items: center; gap: 2px; justify-content: center; }
+        
+        /* 1ST, 2ND 글씨는 좁은 기둥 안에서 찌그러지니까 살짝 숨길게요 */
+        .step-label { display: none; } 
         
         .status-box { 
             flex: 1;
-            padding: 0 4px; border-radius: 20px; border: 1px solid rgba(0,0,0,0.1); 
-            font-size: 10px; text-align: center; font-weight: 800; color: #222; 
-            height: 14px; line-height: 14px; 
+            padding: 2px 0; border-radius: 4px; border: 1px solid rgba(0,0,0,0.1); 
+            font-size: 1vh; text-align: center; font-weight: 800; color: #222; 
         }
 
         .tag-chip { 
             background: rgba(135, 206, 235, 0.15); 
             border: 1.5px solid #87CEEB; 
             border-radius: 4px; 
-            padding: 4px 6px; 
-            font-size: 11px; 
+            padding: 3px 0; 
+            font-size: 1.2vh; 
             font-weight: bold; 
             color: #ffffff; 
             display: block; 
@@ -186,9 +198,7 @@
             box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.3); 
         }
 
-        .tag-chip.is-dimmed {
-            opacity: 1.0; 
-        }
+        .tag-chip.is-dimmed { opacity: 1.0; }
 
         .st-done { background: var(--status-done); }
         .st-none { background: var(--status-none); } 
@@ -201,32 +211,36 @@
 
 
         /* =========================================
-           [2페이지 (작업반 분리) 전용 스타일]
+           [2페이지 (작업반 분리) 전용 반응형 스타일]
            ========================================= */
-        #page2 * { font-family: '맑은 고딕', sans-serif; }
-        #page2 { background-color: #1a1e24; color: #ffffff; }
+        #page2 * { font-family: '맑은 고딕', sans-serif; box-sizing: border-box; }
+        #page2 { background-color: #1a1e24; color: #ffffff; padding: 1.5vh 1vw; }
 
-        .dashboard-container {
+        /* 2페이지도 min-width 1600px을 없애고 화면을 꽉 채웁니다! */
+        #page2 .dashboard-container {
             display: flex;
             flex-direction: row; 
-            padding: 15px;
-            gap: 15px;
-            min-height: 100vh;
-            box-sizing: border-box;
-            min-width: 1600px; 
+            padding: 0;
+            gap: 1vw;
+            width: 100%;
+            height: 100%; 
+            min-width: 0; 
         }
 
         #page2 .sidebar {
-            width: 260px; 
+            width: 15%; 
+            min-width: 220px;
+            max-width: 300px;
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 1.5vh;
+            flex-shrink: 0;
         }
 
         .sidebar-box {
             background-color: #22272e;
             border-radius: 8px;
-            padding: 15px;
+            padding: 1.5vh 1vw;
             border: 1px solid #3d444d;
         }
 
@@ -235,260 +249,217 @@
             justify-content: space-around; 
         }
 
-        .chart-item {
+        #page2 .chart-item {
             display: flex;
             flex-direction: column;
             align-items: center;
             gap: 5px;
         }
 
-        .circle-morning {
-            width: 70px; 
-            height: 70px;
+        #page2 .circle-morning {
+            width: 8vh; 
+            height: 8vh;
+            min-width: 60px; min-height: 60px;
             border-radius: 50%;
             border: 6px solid #3498db;
             border-top: 6px solid #2c3e50;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 20px; 
+            font-size: 2.5vh; 
             font-weight: bold;
             color: #3498db;
         }
 
-        .circle-afternoon {
-            width: 70px;
-            height: 70px;
+        #page2 .circle-afternoon {
+            width: 8vh;
+            height: 8vh;
+            min-width: 60px; min-height: 60px;
             border-radius: 50%;
             border: 6px solid #f1c40f;
             border-top: 6px solid #2c3e50;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 20px; 
+            font-size: 2.5vh; 
             font-weight: bold;
             color: #f1c40f;
         }
 
-        .chart-label {
-            font-size: 13px; 
-            color: #8b949e;
-        }
+        #page2 .chart-label { font-size: 1.3vh; color: #8b949e; }
+        
+        #page2 .status-container { display: flex; flex-direction: column; gap: 1vh; }
+        #page2 .status-row { display: flex; justify-content: space-between; font-size: 2vh; font-weight: bold; }
+        #page2 .status-row.completed span:last-child { color: #3498db; }
+        #page2 .status-row.incomplete span:last-child { color: #e74c3c; }
 
-        .status-container {
+        #page2 .warning-container { border-color: #e74c3c; display: flex; flex-direction: column; }
+        #page2 .warning-title { color: #e74c3c; font-weight: bold; font-size: 1.6vh; margin-bottom: 1vh; }
+        #page2 .warning-list { display: flex; flex-direction: column; gap: 6px; overflow-y: auto; max-height: 15vh; }
+        #page2 .warning-item { border: 1px solid #e74c3c; border-radius: 4px; padding: 6px; font-size: 1.3vh; font-weight: bold; background-color: rgba(231, 76, 60, 0.1); }
+
+        #page2 .info-container { display: flex; flex-direction: column; align-items: center; gap: 1.5vh; }
+        #page2 .board-legend { font-size: 1.2vh; display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+        #page2 .legend-item { display: flex; align-items: center; gap: 4px; }
+        #page2 .color-box { width: 12px; height: 12px; border-radius: 2px; }
+        #page2 .color-completed { background-color: #3498db; }
+        #page2 .color-unassigned { background-color: #2c3e50; border: 1px solid #7f8c8d; }
+        #page2 .color-under-5h { background-color: #f1c40f; }
+        #page2 .color-under-4h { background-color: #e67e22; }
+        #page2 .color-working { background-color: #2ecc71; }
+
+        #page2 .main-board {
+            flex: 1; 
+            min-width: 0; 
             display: flex;
             flex-direction: column;
-            gap: 10px;
-        }
-
-        #page2 .status-row {
-            display: flex;
-            justify-content: space-between;
-            font-size: 18px; 
-            font-weight: bold;
-        }
-
-        .status-row.completed span:last-child { color: #3498db; }
-        .status-row.incomplete span:last-child { color: #e74c3c; }
-
-        .warning-container {
-            border-color: #e74c3c;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .warning-title {
-            color: #e74c3c;
-            font-weight: bold;
-            font-size: 16px; 
-            margin-bottom: 10px;
-        }
-
-        .warning-list {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .warning-item {
-            border: 1px solid #e74c3c;
-            border-radius: 4px;
-            padding: 8px;
-            font-size: 14px; 
-            font-weight: bold;
-            background-color: rgba(231, 76, 60, 0.1);
-        }
-
-        .info-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center; 
-            gap: 15px;
-        }
-
-        .board-legend {
-            font-size: 13px; 
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-
-        #page2 .legend-item {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .color-box {
-            width: 12px;
-            height: 12px;
-            border-radius: 2px;
-        }
-
-        .color-completed { background-color: #3498db; }
-        .color-unassigned { background-color: #2c3e50; border: 1px solid #7f8c8d; }
-        .color-under-5h { background-color: #f1c40f; }
-        .color-under-4h { background-color: #e67e22; }
-        .color-working { background-color: #2ecc71; }
-
-        .main-board {
-            flex-grow: 1;
             background-color: #22272e;
             border-radius: 8px;
-            padding: 10px;
+            padding: 1.5vh 1vw;
             border: 1px solid #3d444d;
+            overflow: hidden; 
         }
 
-        .team-grid {
+        #page2 .team-grid {
             display: grid;
             grid-template-columns: repeat(8, 1fr); 
-            gap: 15px; 
-            height: 100%;
+            gap: 1vw; 
+            flex: 1;
+            min-height: 0; 
         }
 
         .team-column-page2 {
             background-color: #1c2128;
             border-radius: 8px;
-            padding: 10px;
+            padding: 1vh 0.5vw;
             display: flex;
             flex-direction: column;
-            gap: 10px; 
+            gap: 1vh; 
+            overflow: hidden; 
         }
 
         .team-label-top {
             text-align: center;
-            font-size: 20px; 
+            font-size: 2vh; 
             font-weight: bold;
-            padding-bottom: 8px;
+            padding-bottom: 0.5vh;
             border-bottom: 3px solid #3498db; 
             color: #ffffff;
+            flex-shrink: 0; 
         }
 
-        .active-flights {
+        #page2 .active-flights {
             display: flex;
             flex-direction: column;
-            gap: 10px; 
+            gap: 8px; 
+            overflow-y: auto; 
+            flex-shrink: 0;
+            max-height: 45%; 
+            padding-right: 4px;
         }
 
         #page2 .flight-card {
             background-color: #2d333b;
             border: 1px solid #7f8c8d; 
             border-radius: 6px;
-            padding: 10px; 
+            padding: 8px; 
             display: flex;
             justify-content: space-between; 
             align-items: center; 
         }
 
-        .flight-name {
-            font-size: 24px; 
+        #page2 .flight-name {
+            font-size: 1.8vh; 
             font-weight: bold;
             color: #ffffff;
-            letter-spacing: 1px; 
+            letter-spacing: 0.5px; 
         }
 
-        .flight-side-info {
+        #page2 .flight-side-info {
             display: flex;
             flex-direction: column; 
             align-items: flex-end; 
-            gap: 5px;
+            gap: 4px;
         }
 
-        .flight-std {
-            font-size: 11px;
+        #page2 .flight-std {
+            font-size: 1.1vh;
             font-weight: bold;
             color: #f1c40f; 
             background-color: #1a1e24; 
             border-radius: 3px;
-            padding: 2px 5px;
+            padding: 2px 4px;
         }
 
-        .key-badge {
+        #page2 .key-badge {
             color: #ffffff;
-            padding: 2px 6px; 
+            padding: 2px 5px; 
             border-radius: 3px;
             font-weight: bold;
-            font-size: 11px;
+            font-size: 1vh;
         }
 
-        .badge-1st { background-color: #1abc9c; }
-        .badge-2nd { background-color: #9b59b6; }
+        #page2 .badge-1st { background-color: #1abc9c; }
+        #page2 .badge-2nd { background-color: #9b59b6; }
 
-        .status-under-5h { border-color: #f1c40f; border-width: 2px; }
-        .status-under-4h { border-color: #e67e22; border-width: 2px; }
-        .status-exceeded { border-color: #e74c3c; border-width: 2px; background-color: rgba(231, 76, 60, 0.1); }
-        .status-working-page2 { border-color: #2ecc71; border-width: 2px; }
+        #page2 .status-under-5h { border-color: #f1c40f; border-width: 2px; }
+        #page2 .status-under-4h { border-color: #e67e22; border-width: 2px; }
+        #page2 .status-exceeded { border-color: #e74c3c; border-width: 2px; background-color: rgba(231, 76, 60, 0.1); }
+        #page2 .status-working-page2 { border-color: #2ecc71; border-width: 2px; }
 
         @keyframes blink-page2 {
             0% { box-shadow: 0 0 2px #2ecc71; border-color: #2ecc71; }
             50% { box-shadow: 0 0 10px #2ecc71; border-color: #ffffff; }
             100% { box-shadow: 0 0 2px #2ecc71; border-color: #2ecc71; }
         }
-        .blinking-page2 {
+        #page2 .blinking-page2 {
             animation: blink-page2 1.5s infinite;
         }
 
-        .completed-flights {
+        #page2 .completed-flights {
             display: flex;
             flex-direction: column; 
             gap: 4px;
             border-top: 1px dashed #3d444d;
             padding-top: 8px;
             margin-top: auto; 
+            overflow-y: auto; 
+            flex: 1;
+            padding-right: 4px;
         }
 
-        .flight-mini {
+        #page2 .flight-mini {
             background-color: #3498db;
             color: #ffffff;
             padding: 4px 6px; 
             border-radius: 4px;
-            font-size: 12px; 
+            font-size: 1.2vh; 
             font-weight: bold;
             display: flex; 
             justify-content: space-between; 
             align-items: center;
+            min-height: 24px;
         }
 
-        .mini-name-wrap {
+        #page2 .mini-name-wrap {
             display: flex;
             align-items: center;
-            gap: 5px;
+            gap: 4px;
         }
 
-        .mini-key {
+        #page2 .mini-key {
             background-color: #ffffff; 
-            padding: 1px 4px;
+            padding: 1px 3px;
             border-radius: 3px;
-            font-size: 9px;
+            font-size: 0.9vh;
             font-weight: bold;
         }
 
-        .mini-1st { color: #1abc9c; }
-        .mini-2nd { color: #9b59b6; }
+        #page2 .mini-1st { color: #1abc9c; }
+        #page2 .mini-2nd { color: #9b59b6; }
 
-        .mini-std {
-            font-size: 10px;
+        #page2 .mini-std {
+            font-size: 1vh;
             font-weight: normal;
             color: #d1d8e0; 
         }
@@ -514,12 +485,12 @@
         <div class="right-panel">
             <div class="main-card">
                 <div class="main-header">
-                    <div style="font-size:14px; font-weight:bold;">작업 현황 (06:00 - 24:00)</div>
+                    <div style="font-size:1.5vh; font-weight:bold;">작업 현황 (06:00 - 24:00)</div>
                     <div class="legend">
                         <div class="legend-item"><i class="dot" style="background:var(--status-done)"></i> 완료</div>
                         <div class="legend-item"><i class="dot" style="background:var(--status-none)"></i> 미배정</div>
-                        <div class="legend-item"><i class="dot" style="background:var(--status-5h)"></i> 5h</div>
-                        <div class="legend-item"><i class="dot" style="background:var(--status-4h)"></i> 4h</div>
+                        <div class="legend-item"><i class="dot" style="background:var(--status-5h)"></i> 5h 미만</div>
+                        <div class="legend-item"><i class="dot" style="background:var(--status-4h)"></i> 4h 미만</div>
                         <div class="legend-item"><i class="dot" style="background:var(--status-working)"></i> 작업중</div>
                     </div>
                 </div>
@@ -527,8 +498,6 @@
             </div>
         </div>
     </div>
-
-
     <div id="page2" class="page-container">
         <div class="dashboard-container">
             
@@ -564,7 +533,7 @@
                 </div>
 
                 <div class="sidebar-box info-container">
-                    <div id="clock" style="font-size: 24px; font-weight: bold; color: #3498db;"></div>
+                    <div id="clock" style="font-size: 2.5vh; font-weight: bold; color: #3498db;"></div>
                     <div class="board-legend">
                         <div class="legend-item"><div class="color-box color-completed"></div>완료</div>
                         <div class="legend-item"><div class="color-box color-unassigned"></div>미배정</div>
@@ -968,9 +937,8 @@
             </div>
         </div>
     </div>
-
     <script>
-        // 1. 페이지 전환 마법 (버튼 클릭 시 실행)
+        // 1. 페이지 전환 마법
         let currentPage = 1;
         function togglePage() {
             const page1 = document.getElementById('page1');
@@ -978,13 +946,11 @@
             const btn = document.querySelector('.toggle-btn');
 
             if (currentPage === 1) {
-                // 1페이지 끄고, 2페이지 켜기
                 page1.classList.remove('active');
                 page2.classList.add('active');
                 btn.innerText = "1페이지 보기 (가로 타임라인)";
                 currentPage = 2;
             } else {
-                // 2페이지 끄고, 1페이지 켜기
                 page2.classList.remove('active');
                 page1.classList.add('active');
                 btn.innerText = "2페이지 보기 (작업반 분리)";
@@ -992,7 +958,7 @@
             }
         }
 
-        // 2. 1페이지 타임라인 데이터 세팅 (주신 코드 그대로)
+        // 2. 1페이지 타임라인 자바스크립트 마법!
         const timeline = document.getElementById('timeline');
         const priorityScore = { 'st-4h': 5, 'st-5h': 4, 'st-working': 3, 'st-none': 2, 'st-done': 1 };
 
@@ -1003,7 +969,7 @@
                 for (let i = 1; i <= count; i++) {
                     allFlights.push({ 
                         hour, 
-                        fltNo: `AC${hour}${i.toString().padStart(2, '0')}`, 
+                        fltNo: `KE${hour}${i.toString().padStart(2, '0')}`, 
                         std: `${hour.toString().padStart(2, '0')}:${(i*5 % 60).toString().padStart(2, '0')}`,
                         s1: 'st-done', 
                         s2: 'st-done' 
@@ -1037,9 +1003,9 @@
 
             const stdContainer = document.getElementById('std-over-list');
             const stdData = [
-                { fltNo: 'AC604', std: '06:45' }, 
-                { fltNo: 'AC1605', std: '16:45' }, 
-                { fltNo: 'AC2008', std: '20:45' }
+                { fltNo: 'KE604', std: '06:45' }, 
+                { fltNo: 'KE1605', std: '16:45' }, 
+                { fltNo: 'KE2008', std: '20:45' }
             ];
             
             stdData.forEach(f => {
@@ -1096,7 +1062,7 @@
         }
         initDashboard();
 
-        // 3. 2페이지 시계 데이터 세팅 (주신 코드 그대로)
+        // 3. 현재 시간 시계 마법!
         function updateClock() {
             const now = new Date();
             let hours = now.getHours().toString().padStart(2, '0');
