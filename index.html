@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EOS 대시보드 - 1ST/2ND 색상 분리</title>
+    <style>
+        /* 1. 전체 화면 배경색과 글씨체예요. */
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #1a1e24;
+            color: #ffffff;
+            font-family: '맑은 고딕', sans-serif;
+            overflow-x: auto; 
+            overflow-y: auto; 
+        }
+
+        /* 2. 대시보드를 감싸는 커다란 상자예요. */
+        .dashboard-container {
+            display: flex;
+            flex-direction: row; 
+            padding: 15px;
+            gap: 15px;
+            min-height: 100vh;
+            box-sizing: border-box;
+            min-width: 1600px; 
+        }
+
+        /* 3. 화면 왼쪽 요약 정보창이에요. */
+        .sidebar {
+            width: 260px; 
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .sidebar-box {
+            background-color: #22272e;
+            border-radius: 8px;
+            padding: 15px;
+            border: 1px solid #3d444d;
+        }
+
+        /* 4. 달성률을 보여주는 동그라미 상자예요. */
+        .chart-container-side {
+            display: flex;
+            justify-content: space-around; 
+        }
+
+        .chart-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .circle-morning {
+            width: 70px; 
+            height: 70px;
+            border-radius: 50%;
+            border: 6px solid #3498db;
+            border-top: 6px solid #2c3e50;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px; 
+            font-weight: bold;
+            color: #3498db;
+        }
+
+        .circle-afternoon {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            border: 6px solid #f1c40f;
+            border-top: 6px solid #2c3e50;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px; 
+            font-weight: bold;
+            color: #f1c40f;
+        }
+
+        .chart-label {
+            font-size: 13px; 
+            color: #8b949e;
+        }
+
+        /* 5. 완료, 미완료 개수 상자예요. */
+        .status-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .status-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 18px; 
+            font-weight: bold;
+        }
+
+        .status-row.completed span:last-child { color: #3498db; }
+        .status-row.incomplete span:last-child { color: #e74c3c; }
+
+        /* 6. STD 초과 경고 상자예요. */
+        .warning-container {
+            border-color: #e74c3c;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .warning-title {
+            color: #e74c3c;
+            font-weight: bold;
+            font-size: 16px; 
+            margin-bottom: 10px;
+        }
+
+        .warning-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .warning-item {
+            border: 1px solid #e74c3c;
+            border-radius: 4px;
+            padding: 8px;
+            font-size: 14px; 
+            font-weight: bold;
+            background-color: rgba(231, 76, 60, 0.1);
+        }
+
+        /* 7. 시계와 범례가 들어가는 상자예요. */
+        .info-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center; 
+            gap: 15px;
+        }
+
+        .board-legend {
+            font-size: 13px; 
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .color-box {
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
+        }
+
+        .color-completed { background-color: #3498db; }
+        .color-unassigned { background-color: #2c3e50; border: 1px solid #7f8c8d; }
+        .color-under-5h { background-color: #f1c40f; }
+        .color-under-4h { background-color: #e67e22; }
+        .color-working { background-color: #2ecc71; }
+
+        /* 8. 화면 오른쪽 넓은 작업반 시간표 상자예요. */
+        .main-board {
+            flex-grow: 1;
+            background-color: #22272e;
+            border-radius: 8px;
+            padding: 10px;
+            border: 1px solid #3d444d;
+        }
+
+        /* 9. 8개의 작업반 기둥을 세웁니다. */
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr); 
+            gap: 15px; 
+            height: 100%;
+        }
+
+        /* 10. 세로로 서 있는 작업반 기둥 하나하나의 모습이에요. */
+        .team-column {
+            background-color: #1c2128;
+            border-radius: 8px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px; 
+        }
+
+        .team-label-top {
+            text-align: center;
+            font-size: 20px; 
+            font-weight: bold;
+            padding-bottom: 8px;
+            border-bottom: 3px solid #3498db; 
+            color: #ffffff;
+        }
+
+        /* 11. 아직 끝나지 않은 큰 비행기 카드들이에요. */
+        .active-flights {
+            display: flex;
+            flex-direction: column;
+            gap: 10px; 
+        }
+
+        .flight-card {
+            background-color: #2d333b;
+            border: 1px solid #7f8c8d; 
+            border-radius: 6px;
+            padding: 10px; 
+            display: flex;
+            justify-content: space-between; 
+            align-items: center; 
+        }
+
+        .flight-name {
+            font-size: 24px; 
+            font-weight: bold;
+            color: #ffffff;
+            letter-spacing: 1px; 
+        }
+
+        .flight-side-info {
+            display: flex;
+            flex-direction: column; 
+            align-items: flex-end; 
+            gap: 5px;
+        }
+
+        .flight-std {
+            font-size: 11px;
+            font-weight: bold;
+            color: #f1c40f; 
+            background-color: #1a1e24; 
+            border-radius: 3px;
+            padding: 2px 5px;
+        }
+
+        /* ★ 새로 바꾼 이름표 마법이에요! 글씨는 하얀색으로 했어요 ★ */
+        .key-badge {
+            color: #ffffff;
+            padding: 2px 6px; 
+            border-radius: 3px;
+            font-weight: bold;
+            font-size: 11px;
+        }
+
+        /* 1ST는 눈에 띄는 청록색 옷을 입어요 */
+        .badge-1st {
+            background-color: #1abc9c;
+        }
+
+        /* 2ND는 예쁜 보라색 옷을 입어요 */
+        .badge-2nd {
+            background-color: #9b59b6;
+        }
+
+        /* 색깔 꾸미기 마법 */
+        .status-under-5h { border-color: #f1c40f; border-width: 2px; }
+        .status-under-4h { border-color: #e67e22; border-width: 2px; }
+        .status-exceeded { border-color: #e74c3c; border-width: 2px; background-color: rgba(231, 76, 60, 0.1); }
+        .status-working { border-color: #2ecc71; border-width: 2px; }
+
+        @keyframes blink {
+            0% { box-shadow: 0 0 2px #2ecc71; border-color: #2ecc71; }
+            50% { box-shadow: 0 0 10px #2ecc71; border-color: #ffffff; }
+            100% { box-shadow: 0 0 2px #2ecc71; border-color: #2ecc71; }
+        }
+        .blinking {
+            animation: blink 1.5s infinite;
+        }
+
+        /* 12. 파란색으로 예쁘게 칠해진 다 끝난 꼬마 비행기들이에요. */
+        .completed-flights {
+            display: flex;
+            flex-direction: column; 
+            gap: 4px;
+            border-top: 1px dashed #3d444d;
+            padding-top: 8px;
+            margin-top: auto; 
+        }
+
+        .flight-mini {
+            background-color: #3498db;
+            color: #ffffff;
+            padding: 4px 6px; 
+            border-radius: 4px;
+            font-size: 12px; 
+            font-weight: bold;
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+        }
+
+        .mini-name-wrap {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* ★ 꼬마 비행기 전용 이름표예요. 바탕은 하얀색이에요 ★ */
+        .mini-key {
+            background-color: #ffffff; 
+            padding: 1px 4px;
+            border-radius: 3px;
+            font-size: 9px;
+            font-weight: bold;
+        }
+
+        /* 꼬마 비행기 1ST는 청록색 글씨를 써요 */
+        .mini-1st {
+            color: #1abc9c;
+        }
+
+        /* 꼬마 비행기 2ND는 보라색 글씨를 써요 */
+        .mini-2nd {
+            color: #9b59b6;
+        }
+
+        .mini-std {
+            font-size: 10px;
+            font-weight: normal;
+            color: #d1d8e0; 
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="dashboard-container">
+        
+        <div class="sidebar">
+            
+            <div class="sidebar-box chart-container-side">
+                <div class="chart-item">
+                    <div class="circle-morning">82</div>
+                    <div class="chart-label">오전 달성률(%)</div>
+                </div>
+                <div class="chart-item">
+                    <div class="circle-afternoon">45</div>
+                    <div class="chart-label">오후 달성률(%)</div>
+                </div>
+            </div>
+
+            <div class="sidebar-box status-container">
+                <div class="status-row completed">
+                    <span>완료</span>
+                    <span>134건</span> 
+                </div>
+                <div class="status-row incomplete">
+                    <span>미완료</span>
+                    <span>26건</span> 
+                </div>
+            </div>
+
+            <div class="sidebar-box warning-container">
+                <div class="warning-title">⚠️ STD 초과 주의</div>
+                <div class="warning-list">
+                    <div class="warning-item">FLT: KE401 (06:45)</div>
+                    <div class="warning-item">FLT: KE603 (07:15)</div>
+                </div>
+            </div>
+
+            <div class="sidebar-box info-container">
+                <div id="clock" style="font-size: 24px; font-weight: bold; color: #3498db;"></div>
+                <div class="board-legend">
+                    <div class="legend-item"><div class="color-box color-completed"></div>완료</div>
+                    <div class="legend-item"><div class="color-box color-unassigned"></div>미배정</div>
+                    <div class="legend-item"><div class="color-box color-under-5h"></div>5h 미만</div>
+                    <div class="legend-item"><div class="color-box color-under-4h"></div>4h 미만</div>
+                    <div class="legend-item"><div class="color-box color-working"></div>작업중</div>
+                </div>
+            </div>
+
+        </div>
+        <div class="main-board">
+            <div class="team-grid">
+
+                <div class="team-column">
+                    <div class="team-label-top">1반</div>
+                    <div class="active-flights">
+                        <div class="flight-card status-working blinking">
+                            <div class="flight-name">KE101</div>
+                            <div class="flight-side-info">
+                                <div class="flight-std">STD 07:30</div>
+                                <div class="key-badge badge-1st">1ST</div>
+                            </div>
+                        </div>
+                        <div class="flight-card status-under-4h">
+                            <div class="flight-name">KE102</div>
+                            <div class="flight-side-info">
+                                <div class="flight-std">STD 08:00</div>
+                                <div class="key-badge badge-2nd">2ND</div>
+                            </div>
+                        </div>
+                        <div class="flight-card">
+                            <div class="flight-name">KE103</div>
+                            <div class="flight-side-info">
+                                <div class="flight-std">STD 09:30</div>
+                                <div class="key-badge badge-1st">1ST</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="completed-flights">
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE104</span><span class="mini-key mini-1st">1ST</span></div><span class="mini-std">(06:00)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE105</span><span class="mini-key mini-2nd">2ND</span></div><span class="mini-std">(06:10)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE106</span><span class="mini-key mini-1st">1ST</span></div><span class="mini-std">(06:20)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE107</span><span class="mini-key mini-2nd">2ND</span></div><span class="mini-std">(06:30)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE108</span><span class="mini-key mini-1st">1ST</span></div><span class="mini-std">(06:40)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE109</span><span class="mini-key mini-2nd">2ND</span></div><span class="mini-std">(06:50)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE110</span><span class="mini-key mini-1st">1ST</span></div><span class="mini-std">(07:00)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE111</span><span class="mini-key mini-2nd">2ND</span></div><span class="mini-std">(07:10)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE112</span><span class="mini-key mini-1st">1ST</span></div><span class="mini-std">(07:20)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE113</span><span class="mini-key mini-1st">1ST</span></div><span class="mini-std">(07:30)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE114</span><span class="mini-key mini-2nd">2ND</span></div><span class="mini-std">(07:40)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE115</span><span class="mini-key mini-1st">1ST</span></div><span class="mini-std">(07:50)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE116</span><span class="mini-key mini-2nd">2ND</span></div><span class="mini-std">(08:00)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE117</span><span class="mini-key mini-1st">1ST</span></div><span class="mini-std">(08:10)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE118</span><span class="mini-key mini-2nd">2ND</span></div><span class="mini-std">(08:20)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE119</span><span class="mini-key mini-1st">1ST</span></div><span class="mini-std">(08:30)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE120</span><span class="mini-key mini-2nd">2ND</span></div><span class="mini-std">(08:40)</span></div>
+                    </div>
+                </div>
+
+                <div class="team-column">
+                    <div class="team-label-top">2반</div>
+                    <div class="active-flights">
+                        <div class="flight-card status-exceeded">
+                            <div class="flight-name">KE204</div>
+                            <div class="flight-side-info">
+                                <div class="flight-std">STD 06:15</div>
+                                <div class="key-badge badge-1st">1ST</div>
+                            </div>
+                        </div>
+                        <div class="flight-card status-under-5h">
+                            <div class="flight-name">KE201</div>
+                            <div class="flight-side-info">
+                                <div class="flight-std">STD 07:45</div>
+                                <div class="key-badge badge-2nd">2ND</div>
+                            </div>
+                        </div>
+                        <div class="flight-card">
+                            <div class="flight-name">KE202</div>
+                            <div class="flight-side-info">
+                                <div class="flight-std">STD 08:15</div>
+                                <div class="key-badge badge-1st">1ST</div>
+                            </div>
+                        </div>
+                        <div class="flight-card status-working blinking">
+                            <div class="flight-name">KE203</div>
+                            <div class="flight-side-info">
+                                <div class="flight-std">STD 09:00</div>
+                                <div class="key-badge badge-2nd">2ND</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="completed-flights">
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE205</span><span class="mini-key mini-1st">1ST</span></div><span class="mini-std">(06:05)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE206</span><span class="mini-key mini-2nd">2ND</span></div><span class="mini-std">(06:15)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE207</span><span class="mini-key mini-1st">1ST</span></div><span class="mini-std">(06:25)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE208</span><span class="mini-key mini-2nd">2ND</span></div><span class="mini-std">(06:35)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE209</span><span class="mini-key mini-1st">1ST</span></div><span class="mini-std">(06:45)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE210</span><span class="mini-key mini-2nd">2ND</span></div><span class="mini-std">(06:55)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE211</span><span class="mini-key mini-1st">1ST</span></div><span class="mini-std">(07:05)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE212</span><span class="mini-key mini-2nd">2ND</span></div><span class="mini-std">(07:15)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE213</span><span class="mini-key mini-1st">1ST</span></div><span class="mini-std">(07:25)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE214</span><span class="mini-key mini-1st">1ST</span></div><span class="mini-std">(07:35)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE215</span><span class="mini-key mini-2nd">2ND</span></div><span class="mini-std">(07:45)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE216</span><span class="mini-key mini-1st">1ST</span></div><span class="mini-std">(07:55)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE217</span><span class="mini-key mini-2nd">2ND</span></div><span class="mini-std">(08:05)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE218</span><span class="mini-key mini-1st">1ST</span></div><span class="mini-std">(08:15)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE219</span><span class="mini-key mini-2nd">2ND</span></div><span class="mini-std">(08:25)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE220</span><span class="mini-key mini-1st">1ST</span></div><span class="mini-std">(08:35)</span></div>
+                    </div>
+                </div>
+
+                <div class="team-column">
+                    <div class="team-label-top">3반</div>
+                    <div class="active-flights">
+                        <div class="flight-card">
+                            <div class="flight-name">KE301</div>
+                            <div class="flight-side-info">
+                                <div class="flight-std">STD 08:10</div>
+                                <div class="key-badge badge-2nd">2ND</div>
+                            </div>
+                        </div>
+                        <div class="flight-card status-under-5h">
+                            <div class="flight-name">KE302</div>
+                            <div class="flight-side-info">
+                                <div class="flight-std">STD 09:00</div>
+                                <div class="key-badge badge-1st">1ST</div>
+                            </div>
+                        </div>
+                        <div class="flight-card status-working blinking">
+                            <div class="flight-name">KE303</div>
+                            <div class="flight-side-info">
+                                <div class="flight-std">STD 09:30</div>
+                                <div class="key-badge badge-1st">1ST</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="completed-flights">
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE304</span><span class="mini-key mini-1st">1ST</span></div><span class="mini-std">(06:02)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE305</span><span class="mini-key mini-2nd">2ND</span></div><span class="mini-std">(06:12)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE306</span><span class="mini-key mini-1st">1ST</span></div><span class="mini-std">(06:22)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE307</span><span class="mini-key mini-2nd">2ND</span></div><span class="mini-std">(06:32)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE308</span><span class="mini-key mini-1st">1ST</span></div><span class="mini-std">(06:42)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE309</span><span class="mini-key mini-2nd">2ND</span></div><span class="mini-std">(06:52)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE310</span><span class="mini-key mini-1st">1ST</span></div><span class="mini-std">(07:02)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE311</span><span class="mini-key mini-2nd">2ND</span></div><span class="mini-std">(07:12)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE312</span><span class="mini-key mini-1st">1ST</span></div><span class="mini-std">(07:32)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE313</span><span class="mini-key mini-1st">1ST</span></div><span class="mini-std">(07:42)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE314</span><span class="mini-key mini-2nd">2ND</span></div><span class="mini-std">(07:52)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE315</span><span class="mini-key mini-1st">1ST</span></div><span class="mini-std">(08:02)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE316</span><span class="mini-key mini-2nd">2ND</span></div><span class="mini-std">(08:12)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE317</span><span class="mini-key mini-1st">1ST</span></div><span class="mini-std">(08:22)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE318</span><span class="mini-key mini-2nd">2ND</span></div><span class="mini-std">(08:32)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE319</span><span class="mini-key mini-1st">1ST</span></div><span class="mini-std">(08:42)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE320</span><span class="mini-key mini-2nd">2ND</span></div><span class="mini-std">(08:52)</span></div>
+                    </div>
+                </div>
+
+                <div class="team-column">
+                    <div class="team-label-top">4반</div>
+                    <div class="active-flights">
+                        <div class="flight-card status-exceeded">
+                            <div class="flight-name">KE401</div>
+                            <div class="flight-side-info">
+                                <div class="flight-std">STD 06:45</div>
+                                <div class="key-badge badge-2nd">2ND</div>
+                            </div>
+                        </div>
+                        <div class="flight-card status-working blinking">
+                            <div class="flight-name">KE402</div>
+                            <div class="flight-side-info">
+                                <div class="flight-std">STD 08:30</div>
+                                <div class="key-badge badge-1st">1ST</div>
+                            </div>
+                        </div>
+                        <div class="flight-card">
+                            <div class="flight-name">KE403</div>
+                            <div class="flight-side-info">
+                                <div class="flight-std">STD 09:15</div>
+                                <div class="key-badge badge-1st">1ST</div>
+                            </div>
+                        </div>
+                        <div class="flight-card status-under-4h">
+                            <div class="flight-name">KE404</div>
+                            <div class="flight-side-info">
+                                <div class="flight-std">STD 09:45</div>
+                                <div class="key-badge badge-1st">1ST</div>
+                            </div>
+                        </div>
+                        <div class="flight-card status-under-5h">
+                            <div class="flight-name">KE405</div>
+                            <div class="flight-side-info">
+                                <div class="flight-std">STD 10:30</div>
+                                <div class="key-badge badge-2nd">2ND</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="completed-flights">
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE406</span><span class="mini-key mini-1st">1ST</span></div><span class="mini-std">(06:10)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE407</span><span class="mini-key mini-2nd">2ND</span></div><span class="mini-std">(06:20)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE408</span><span class="mini-key mini-1st">1ST</span></div><span class="mini-std">(06:30)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE409</span><span class="mini-key mini-2nd">2ND</span></div><span class="mini-std">(06:40)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE410</span><span class="mini-key mini-1st">1ST</span></div><span class="mini-std">(06:50)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE411</span><span class="mini-key mini-2nd">2ND</span></div><span class="mini-std">(07:00)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE412</span><span class="mini-key mini-1st">1ST</span></div><span class="mini-std">(07:10)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE413</span><span class="mini-key mini-2nd">2ND</span></div><span class="mini-std">(07:20)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE414</span><span class="mini-key mini-1st">1ST</span></div><span class="mini-std">(07:30)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE415</span><span class="mini-key mini-1st">1ST</span></div><span class="mini-std">(07:40)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE416</span><span class="mini-key mini-2nd">2ND</span></div><span class="mini-std">(07:50)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE417</span><span class="mini-key mini-1st">1ST</span></div><span class="mini-std">(08:00)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE418</span><span class="mini-key mini-2nd">2ND</span></div><span class="mini-std">(08:10)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE419</span><span class="mini-key mini-1st">1ST</span></div><span class="mini-std">(08:20)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE420</span><span class="mini-key mini-2nd">2ND</span></div><span class="mini-std">(08:30)</span></div>
+                    </div>
+                </div>
+
+                <div class="team-column">
+                    <div class="team-label-top">5반</div>
+                    <div class="active-flights">
+                        <div class="flight-card status-exceeded">
+                            <div class="flight-name">KE503</div>
+                            <div class="flight-side-info">
+                                <div class="flight-std">STD 06:10</div>
+                                <div class="key-badge badge-2nd">2ND</div>
+                            </div>
+                        </div>
+                        <div class="flight-card">
+                            <div class="flight-name">KE501</div>
+                            <div class="flight-side-info">
+                                <div class="flight-std">STD 08:45</div>
+                                <div class="key-badge badge-2nd">2ND</div>
+                            </div>
+                        </div>
+                        <div class="flight-card status-working blinking">
+                            <div class="flight-name">KE502</div>
+                            <div class="flight-side-info">
+                                <div class="flight-std">STD 09:20</div>
+                                <div class="key-badge badge-1st">1ST</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="completed-flights">
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE504</span><span class="mini-key mini-1st">1ST</span></div><span class="mini-std">(06:05)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE505</span><span class="mini-key mini-2nd">2ND</span></div><span class="mini-std">(06:15)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE506</span><span class="mini-key mini-1st">1ST</span></div><span class="mini-std">(06:25)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE507</span><span class="mini-key mini-2nd">2ND</span></div><span class="mini-std">(06:35)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE508</span><span class="mini-key mini-1st">1ST</span></div><span class="mini-std">(06:45)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE509</span><span class="mini-key mini-2nd">2ND</span></div><span class="mini-std">(06:55)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE510</span><span class="mini-key mini-1st">1ST</span></div><span class="mini-std">(07:05)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE511</span><span class="mini-key mini-2nd">2ND</span></div><span class="mini-std">(07:15)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE512</span><span class="mini-key mini-1st">1ST</span></div><span class="mini-std">(07:25)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE513</span><span class="mini-key mini-1st">1ST</span></div><span class="mini-std">(07:35)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE514</span><span class="mini-key mini-2nd">2ND</span></div><span class="mini-std">(07:45)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE515</span><span class="mini-key mini-1st">1ST</span></div><span class="mini-std">(07:55)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE516</span><span class="mini-key mini-2nd">2ND</span></div><span class="mini-std">(08:05)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE517</span><span class="mini-key mini-1st">1ST</span></div><span class="mini-std">(08:15)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE518</span><span class="mini-key mini-2nd">2ND</span></div><span class="mini-std">(08:25)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE519</span><span class="mini-key mini-1st">1ST</span></div><span class="mini-std">(08:35)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE520</span><span class="mini-key mini-2nd">2ND</span></div><span class="mini-std">(08:45)</span></div>
+                    </div>
+                </div>
+
+                <div class="team-column">
+                    <div class="team-label-top">6반</div>
+                    <div class="active-flights">
+                        <div class="flight-card status-exceeded">
+                            <div class="flight-name">KE603</div>
+                            <div class="flight-side-info">
+                                <div class="flight-std">STD 07:15</div>
+                                <div class="key-badge badge-1st">1ST</div>
+                            </div>
+                        </div>
+                        <div class="flight-card status-working blinking">
+                            <div class="flight-name">KE601</div>
+                            <div class="flight-side-info">
+                                <div class="flight-std">STD 09:15</div>
+                                <div class="key-badge badge-1st">1ST</div>
+                            </div>
+                        </div>
+                        <div class="flight-card status-under-5h">
+                            <div class="flight-name">KE602</div>
+                            <div class="flight-side-info">
+                                <div class="flight-std">STD 10:00</div>
+                                <div class="key-badge badge-2nd">2ND</div>
+                            </div>
+                        </div>
+                        <div class="flight-card status-under-4h">
+                            <div class="flight-name">KE604</div>
+                            <div class="flight-side-info">
+                                <div class="flight-std">STD 11:30</div>
+                                <div class="key-badge badge-2nd">2ND</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="completed-flights">
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE605</span><span class="mini-key mini-1st">1ST</span></div><span class="mini-std">(06:08)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE606</span><span class="mini-key mini-2nd">2ND</span></div><span class="mini-std">(06:18)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE607</span><span class="mini-key mini-1st">1ST</span></div><span class="mini-std">(06:28)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE608</span><span class="mini-key mini-2nd">2ND</span></div><span class="mini-std">(06:38)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE609</span><span class="mini-key mini-1st">1ST</span></div><span class="mini-std">(06:48)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE610</span><span class="mini-key mini-2nd">2ND</span></div><span class="mini-std">(06:58)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE611</span><span class="mini-key mini-1st">1ST</span></div><span class="mini-std">(07:08)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE612</span><span class="mini-key mini-2nd">2ND</span></div><span class="mini-std">(07:18)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE613</span><span class="mini-key mini-1st">1ST</span></div><span class="mini-std">(07:28)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE614</span><span class="mini-key mini-1st">1ST</span></div><span class="mini-std">(07:38)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE615</span><span class="mini-key mini-2nd">2ND</span></div><span class="mini-std">(07:48)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE616</span><span class="mini-key mini-1st">1ST</span></div><span class="mini-std">(07:58)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE617</span><span class="mini-key mini-2nd">2ND</span></div><span class="mini-std">(08:08)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE618</span><span class="mini-key mini-1st">1ST</span></div><span class="mini-std">(08:18)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE619</span><span class="mini-key mini-2nd">2ND</span></div><span class="mini-std">(08:28)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE620</span><span class="mini-key mini-1st">1ST</span></div><span class="mini-std">(08:38)</span></div>
+                    </div>
+                </div>
+
+                <div class="team-column">
+                    <div class="team-label-top">7반</div>
+                    <div class="active-flights">
+                        <div class="flight-card status-under-4h">
+                            <div class="flight-name">KE701</div>
+                            <div class="flight-side-info">
+                                <div class="flight-std">STD 09:30</div>
+                                <div class="key-badge badge-1st">1ST</div>
+                            </div>
+                        </div>
+                        <div class="flight-card status-working blinking">
+                            <div class="flight-name">KE702</div>
+                            <div class="flight-side-info">
+                                <div class="flight-std">STD 10:45</div>
+                                <div class="key-badge badge-2nd">2ND</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="completed-flights">
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE703</span><span class="mini-key mini-1st">1ST</span></div><span class="mini-std">(06:03)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE704</span><span class="mini-key mini-2nd">2ND</span></div><span class="mini-std">(06:13)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE705</span><span class="mini-key mini-1st">1ST</span></div><span class="mini-std">(06:23)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE706</span><span class="mini-key mini-2nd">2ND</span></div><span class="mini-std">(06:33)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE707</span><span class="mini-key mini-1st">1ST</span></div><span class="mini-std">(06:43)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE708</span><span class="mini-key mini-2nd">2ND</span></div><span class="mini-std">(06:53)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE709</span><span class="mini-key mini-1st">1ST</span></div><span class="mini-std">(07:03)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE710</span><span class="mini-key mini-2nd">2ND</span></div><span class="mini-std">(07:13)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE711</span><span class="mini-key mini-1st">1ST</span></div><span class="mini-std">(07:23)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE712</span><span class="mini-key mini-1st">1ST</span></div><span class="mini-std">(07:33)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE713</span><span class="mini-key mini-2nd">2ND</span></div><span class="mini-std">(07:43)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE714</span><span class="mini-key mini-1st">1ST</span></div><span class="mini-std">(07:53)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE715</span><span class="mini-key mini-2nd">2ND</span></div><span class="mini-std">(08:03)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE716</span><span class="mini-key mini-1st">1ST</span></div><span class="mini-std">(08:13)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE717</span><span class="mini-key mini-2nd">2ND</span></div><span class="mini-std">(08:23)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE718</span><span class="mini-key mini-1st">1ST</span></div><span class="mini-std">(08:33)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE719</span><span class="mini-key mini-2nd">2ND</span></div><span class="mini-std">(08:43)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE720</span><span class="mini-key mini-1st">1ST</span></div><span class="mini-std">(08:53)</span></div>
+                    </div>
+                </div>
+
+                <div class="team-column">
+                    <div class="team-label-top">8반</div>
+                    <div class="active-flights">
+                        <div class="flight-card status-exceeded">
+                            <div class="flight-name">KE803</div>
+                            <div class="flight-side-info">
+                                <div class="flight-std">STD 07:15</div>
+                                <div class="key-badge badge-1st">1ST</div>
+                            </div>
+                        </div>
+                        <div class="flight-card status-working blinking">
+                            <div class="flight-name">KE801</div>
+                            <div class="flight-side-info">
+                                <div class="flight-std">STD 10:15</div>
+                                <div class="key-badge badge-1st">1ST</div>
+                            </div>
+                        </div>
+                        <div class="flight-card status-under-5h">
+                            <div class="flight-name">KE802</div>
+                            <div class="flight-side-info">
+                                <div class="flight-std">STD 11:00</div>
+                                <div class="key-badge badge-2nd">2ND</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="completed-flights">
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE804</span><span class="mini-key mini-1st">1ST</span></div><span class="mini-std">(06:06)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE805</span><span class="mini-key mini-2nd">2ND</span></div><span class="mini-std">(06:16)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE806</span><span class="mini-key mini-1st">1ST</span></div><span class="mini-std">(06:26)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE807</span><span class="mini-key mini-2nd">2ND</span></div><span class="mini-std">(06:36)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE808</span><span class="mini-key mini-1st">1ST</span></div><span class="mini-std">(06:46)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE809</span><span class="mini-key mini-2nd">2ND</span></div><span class="mini-std">(06:56)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE810</span><span class="mini-key mini-1st">1ST</span></div><span class="mini-std">(07:06)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE811</span><span class="mini-key mini-2nd">2ND</span></div><span class="mini-std">(07:16)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE812</span><span class="mini-key mini-1st">1ST</span></div><span class="mini-std">(07:26)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE813</span><span class="mini-key mini-1st">1ST</span></div><span class="mini-std">(07:36)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE814</span><span class="mini-key mini-2nd">2ND</span></div><span class="mini-std">(07:46)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE815</span><span class="mini-key mini-1st">1ST</span></div><span class="mini-std">(07:56)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE816</span><span class="mini-key mini-2nd">2ND</span></div><span class="mini-std">(08:06)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE817</span><span class="mini-key mini-1st">1ST</span></div><span class="mini-std">(08:16)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE818</span><span class="mini-key mini-2nd">2ND</span></div><span class="mini-std">(08:26)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE819</span><span class="mini-key mini-1st">1ST</span></div><span class="mini-std">(08:36)</span></div>
+                        <div class="flight-mini"><div class="mini-name-wrap"><span>KE820</span><span class="mini-key mini-2nd">2ND</span></div><span class="mini-std">(08:46)</span></div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        function updateClock() {
+            const now = new Date();
+            let hours = now.getHours().toString().padStart(2, '0');
+            let minutes = now.getMinutes().toString().padStart(2, '0');
+            let seconds = now.getSeconds().toString().padStart(2, '0');
+            
+            document.getElementById('clock').innerText = "현재 시간: " + hours + ":" + minutes + ":" + seconds;
+        }
+
+        updateClock();
+        setInterval(updateClock, 1000);
+    </script>
+
+</body>
+</html>
